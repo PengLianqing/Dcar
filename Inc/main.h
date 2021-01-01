@@ -37,6 +37,10 @@ extern "C" {
 #include "bsp_can.h"
 #include "remote_control.h"
 #include "tim_timer.h"
+
+//FreeRTOS
+#include "FreeRTOSConfig.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 

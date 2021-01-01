@@ -102,3 +102,46 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 	}
 }
+#include "FreeRTOS.h"
+#include "timers.h"
+void SoftTimer10HzCallback(TimerHandle_t xTimer)
+{
+	static TickType_t xTimeNow;
+	xTimeNow = xTaskGetTickCount();
+			
+	feedback_data.channel[0]=1.0;//rand()%1024;
+	feedback_data.channel[1]=rand()%1024;
+	feedback_data.channel[2]=rand()%1024;
+	feedback_data.imu_angel [0] = 1;//(float)(rand()%1024*0.1f);
+	feedback_data.imu_angel [1] = (float)(rand()%1024*0.1f);
+	feedback_data.imu_angel [2] = (float)(rand()%1024*0.1f);
+	feedback_data.mode0 = rand()%3;
+	feedback_data.mode1 = rand()%3;
+	BBB_data_send(&feedback_data);
+}
+
+void SoftTimer100HzCallback(TimerHandle_t xTimer)
+{
+	static TickType_t xTimeNow;
+	xTimeNow = xTaskGetTickCount();
+	
+	static int16_t rc_ctrl_last=0;
+	float rc_ctrl_target = 0.0f;
+	rc_ctrl_target = (float)(rc_ctrl_last*0.6f)+(float)(rc_ctrl.rc.ch[0]*0.4f);
+	moto_position[4].moto_target_angle = (rc_ctrl_target*360.0f/660.0f);
+	rc_ctrl_last = rc_ctrl.rc.ch[0];
+}
+
+void SoftTimer1000HzCallback(TimerHandle_t xTimer)
+{
+	static TickType_t xTimeNow;
+	xTimeNow = xTaskGetTickCount();
+	
+	led1_toggle();	
+	M6020_Moto1_Measure = get_6020_moto1_measure_point();
+	moto_control_data_process(&moto_position[4],&motor_chassis[4]);
+	pid_calc(&pid_6020_moto1_position,moto_position[4].moto_result_angle,moto_position[4].moto_target_angle);
+	moto_position[4].moto_target_speed = pid_6020_moto1_position.pos_out;
+	pid_calc(&pid_6020_moto1_velocity,moto_position[4].moto_result_speed,moto_position[4].moto_target_speed);
+	CAN_cmd_can1(pid_6020_moto1_velocity.delta_out,0,0,0);
+}

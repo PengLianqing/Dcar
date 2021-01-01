@@ -1,0 +1,4 @@
+/MDK-ARM/DebugConfig/
+/MDK-ARM/remote_control/
+*.a
+*.d
