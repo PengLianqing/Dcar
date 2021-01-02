@@ -72,7 +72,7 @@ void TaskInitThread(void *pvParameters)
 	//创建remote control任务
 	xTaskCreate( TaskRemoteCtrlThread, 		/* 任务函数 */
 							"vTaskRemoteCtrlThread", 	/* 任务名 */
-							100, 											/* 任务栈大小，单位word，也就是4字节 */
+							128, 											/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 										/* 任务参数 */
 							0, 												/* 任务优先级*/
 							&xHandleRemoteCtrl ); 		/* 任务句柄 */
