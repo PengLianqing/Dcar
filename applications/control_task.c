@@ -29,20 +29,16 @@
 #include "main.h"
 
 //init task
-static void TaskInitThread(void *pvParameters);
-static TaskHandle_t xHandleTaskInit = NULL;
+void init_task(void *pvParameters);
+TaskHandle_t xHandleInit = NULL;
 
 //test task
-static void TaskTestThread(void *pvParameters);
-static TaskHandle_t xHandleTest = NULL;
+void test_task(void *pvParameters);
+TaskHandle_t xHandleTest = NULL;
 
-//remote control task
-static void TaskRemoteCtrlThread(void *pvParameters);
-static TaskHandle_t xHandleRemoteCtrl = NULL;
-
-//M6020 control task
-static void TaskMotoCtrlThread(void *pvParameters);
-static TaskHandle_t xHandleMotoCtrl = NULL;
+//USB task
+void usb_task(void *pvParameters);
+TaskHandle_t xHandleUSB = NULL;
 
 //soft timer
 TimerHandle_t SoftTimer1000HzHandle;
@@ -56,63 +52,63 @@ void SoftTimer10HzCallback(TimerHandle_t xTimer);
 
 void freertos_init(void)
 {
-	xTaskCreate( TaskInitThread, 		/* 任务函数 */
-							"vTaskInitThread", 	/* 任务名 */
+	xTaskCreate( init_task, 		/* 任务函数 */
+							"init_task", 	/* 任务名 */
 							100, 								/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 							/* 任务参数 */
 							0, 									/* 任务优先级*/
-							&xHandleTaskInit ); /* 任务句柄 */
+							&xHandleInit ); /* 任务句柄 */
 	vTaskStartScheduler();          //开启任务调度
 }
 
-void TaskInitThread(void *pvParameters)
+void init_task(void *pvParameters)
 {
 	taskENTER_CRITICAL();           //进入临界区
 	
 	//创建remote control任务
-	xTaskCreate( TaskRemoteCtrlThread, 		/* 任务函数 */
-							"vTaskRemoteCtrlThread", 	/* 任务名 */
+	xTaskCreate( usb_task, 		/* 任务函数 */
+							"usb_task", 	/* 任务名 */
 							128, 											/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 										/* 任务参数 */
-							0, 												/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
-							&xHandleRemoteCtrl ); 		/* 任务句柄 */
+							2, 												/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
+							&xHandleUSB ); 		/* 任务句柄 */
 	
-	//创建test任务
-	xTaskCreate( TaskTestThread, 		/* 任务函数 */
-							"vTaskTestThread", 	/* 任务名 */
-							100, 											/* 任务栈大小，单位word，也就是4字节 */
-							NULL, 										/* 任务参数 */
-							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
-							&xHandleTest ); 		/* 任务句柄 */
-	
-	//创建soft timer任务1000Hz
-	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)1,
-																(UBaseType_t )pdTRUE, //周期定时器
-																(void*)1, //定时器ID
-																(TimerCallbackFunction_t)SoftTimer1000HzCallback); //周期定时器，周期1ms(1个时钟节拍)，周期模式
-	xTimerStart(SoftTimer1000HzHandle,0); //开启周期定时器
-	
-	//创建soft timer任务100Hz																
-	SoftTimer100HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)10,
-																(UBaseType_t )pdTRUE, //周期定时器
-																(void*)2, //定时器ID
-																(TimerCallbackFunction_t)SoftTimer100HzCallback); //周期定时器，周期10ms(10个时钟节拍)，周期模式
-	xTimerStart(SoftTimer100HzHandle,0); //开启周期定时器
-	
-	//创建soft timer任务10Hz																
-	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)100,
-																(UBaseType_t )pdTRUE, //周期定时器
-																(void*)3, //定时器ID
-																(TimerCallbackFunction_t)SoftTimer10HzCallback); //周期定时器，周期100ms(100个时钟节拍)，周期模式
-	xTimerStart(SoftTimer10HzHandle,0); //开启周期定时器													
+//	//创建test任务
+//	xTaskCreate( test_task, 		/* 任务函数 */
+//							"test_task", 	/* 任务名 */
+//							100, 											/* 任务栈大小，单位word，也就是4字节 */
+//							NULL, 										/* 任务参数 */
+//							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
+//							&xHandleTest ); 		/* 任务句柄 */
+//	
+//	//创建soft timer任务1000Hz
+//	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)1,
+//																(UBaseType_t )pdTRUE, //周期定时器
+//																(void*)1, //定时器ID
+//																(TimerCallbackFunction_t)SoftTimer1000HzCallback); //周期定时器，周期1ms(1个时钟节拍)，周期模式
+//	xTimerStart(SoftTimer1000HzHandle,0); //开启周期定时器
+//	
+//	//创建soft timer任务100Hz																
+//	SoftTimer100HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)10,
+//																(UBaseType_t )pdTRUE, //周期定时器
+//																(void*)2, //定时器ID
+//																(TimerCallbackFunction_t)SoftTimer100HzCallback); //周期定时器，周期10ms(10个时钟节拍)，周期模式
+//	xTimerStart(SoftTimer100HzHandle,0); //开启周期定时器
+//	
+//	//创建soft timer任务10Hz																
+//	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)100,
+//																(UBaseType_t )pdTRUE, //周期定时器
+//																(void*)3, //定时器ID
+//																(TimerCallbackFunction_t)SoftTimer10HzCallback); //周期定时器，周期100ms(100个时钟节拍)，周期模式
+//	xTimerStart(SoftTimer10HzHandle,0); //开启周期定时器													
 
 
-	vTaskDelete(xHandleTaskInit); //删除开始任务
+	vTaskDelete(xHandleInit); //删除开始任务
 	taskEXIT_CRITICAL();            //退出临界区
 }
 
 
-void TaskTestThread(void *pvParameters)
+void test_task(void *pvParameters)
 {
 	while(1)
 	{
@@ -121,11 +117,3 @@ void TaskTestThread(void *pvParameters)
 	}
 }
 
-void TaskRemoteCtrlThread(void *pvParameters)
-{
-	while(1)
-	{
-		led3_toggle();
-		vTaskDelay(100);
-	}
-}

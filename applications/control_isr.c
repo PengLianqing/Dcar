@@ -2,6 +2,8 @@
 #include "math.h"
 #include "pid.h"
 
+#include "usb_task.h"
+
 //pid_t pid_6020_moto1_velocity;
 //pid_t pid_6020_moto1_position;
 void control_init(void)

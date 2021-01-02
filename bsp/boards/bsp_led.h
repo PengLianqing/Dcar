@@ -20,5 +20,6 @@ void led_init(void);
 void gpio_test_init(void);
 void led1_toggle(void);
 void led2_toggle(void);
+void led3_toggle(void);
 
 #endif
