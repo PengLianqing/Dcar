@@ -135,7 +135,7 @@
 //为1时启用软件定时器
 #define configUSE_TIMERS                        1
 //软件定时器优先级
-#define configTIMER_TASK_PRIORITY               ( 2 )
+#define configTIMER_TASK_PRIORITY               ( configMAX_PRIORITIES-2 ) 
 //软件定时器队列长度
 #define configTIMER_QUEUE_LENGTH                10
 //软件定时器任务堆栈大小，默认( configMINIMAL_STACK_SIZE * 2 )，太小会导致任务执行出错

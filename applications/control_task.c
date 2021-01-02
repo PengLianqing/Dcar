@@ -74,7 +74,7 @@ void TaskInitThread(void *pvParameters)
 							"vTaskRemoteCtrlThread", 	/* 任务名 */
 							128, 											/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 										/* 任务参数 */
-							0, 												/* 任务优先级*/
+							0, 												/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
 							&xHandleRemoteCtrl ); 		/* 任务句柄 */
 	
 	//创建test任务
@@ -82,7 +82,7 @@ void TaskInitThread(void *pvParameters)
 							"vTaskTestThread", 	/* 任务名 */
 							100, 											/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 										/* 任务参数 */
-							0, 												/* 任务优先级*/
+							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
 							&xHandleTest ); 		/* 任务句柄 */
 	
 	//创建soft timer任务1000Hz
