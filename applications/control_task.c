@@ -73,34 +73,34 @@ void init_task(void *pvParameters)
 							2, 												/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
 							&xHandleUSB ); 		/* 任务句柄 */
 	
-//	//创建test任务
-//	xTaskCreate( test_task, 		/* 任务函数 */
-//							"test_task", 	/* 任务名 */
-//							100, 											/* 任务栈大小，单位word，也就是4字节 */
-//							NULL, 										/* 任务参数 */
-//							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
-//							&xHandleTest ); 		/* 任务句柄 */
-//	
-//	//创建soft timer任务1000Hz
-//	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)1,
-//																(UBaseType_t )pdTRUE, //周期定时器
-//																(void*)1, //定时器ID
-//																(TimerCallbackFunction_t)SoftTimer1000HzCallback); //周期定时器，周期1ms(1个时钟节拍)，周期模式
-//	xTimerStart(SoftTimer1000HzHandle,0); //开启周期定时器
-//	
-//	//创建soft timer任务100Hz																
-//	SoftTimer100HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)10,
-//																(UBaseType_t )pdTRUE, //周期定时器
-//																(void*)2, //定时器ID
-//																(TimerCallbackFunction_t)SoftTimer100HzCallback); //周期定时器，周期10ms(10个时钟节拍)，周期模式
-//	xTimerStart(SoftTimer100HzHandle,0); //开启周期定时器
-//	
-//	//创建soft timer任务10Hz																
-//	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)100,
-//																(UBaseType_t )pdTRUE, //周期定时器
-//																(void*)3, //定时器ID
-//																(TimerCallbackFunction_t)SoftTimer10HzCallback); //周期定时器，周期100ms(100个时钟节拍)，周期模式
-//	xTimerStart(SoftTimer10HzHandle,0); //开启周期定时器													
+	//创建test任务
+	xTaskCreate( test_task, 		/* 任务函数 */
+							"test_task", 	/* 任务名 */
+							100, 											/* 任务栈大小，单位word，也就是4字节 */
+							NULL, 										/* 任务参数 */
+							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
+							&xHandleTest ); 		/* 任务句柄 */
+	
+	//创建soft timer任务1000Hz
+	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)1,
+																(UBaseType_t )pdTRUE, //周期定时器
+																(void*)1, //定时器ID
+																(TimerCallbackFunction_t)SoftTimer1000HzCallback); //周期定时器，周期1ms(1个时钟节拍)，周期模式
+	xTimerStart(SoftTimer1000HzHandle,0); //开启周期定时器
+	
+	//创建soft timer任务100Hz																
+	SoftTimer100HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)10,
+																(UBaseType_t )pdTRUE, //周期定时器
+																(void*)2, //定时器ID
+																(TimerCallbackFunction_t)SoftTimer100HzCallback); //周期定时器，周期10ms(10个时钟节拍)，周期模式
+	xTimerStart(SoftTimer100HzHandle,0); //开启周期定时器
+	
+	//创建soft timer任务10Hz																
+	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)100,
+																(UBaseType_t )pdTRUE, //周期定时器
+																(void*)3, //定时器ID
+																(TimerCallbackFunction_t)SoftTimer10HzCallback); //周期定时器，周期100ms(100个时钟节拍)，周期模式
+	xTimerStart(SoftTimer10HzHandle,0); //开启周期定时器													
 
 
 	vTaskDelete(xHandleInit); //删除开始任务

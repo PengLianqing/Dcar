@@ -18,9 +18,26 @@
 #ifndef USB_TASK_H
 #define USB_TASK_H
 
+/**
+  * @brief          usb task
+  * @param[in]      pvParameters: NULL
+  * @retval         none
+  */
 void usb_task(void *pvParameters);
-void OTG_FS_IRQHandler(void);
 
+/**
+  * @brief          usb printf
+  * @param[in]      用法同printf()
+  * @retval         none
+  */
+static void usb_printf(const char *fmt,...);
+
+/**
+  * @brief          usb的中断服务函数
+  * @param[in]      none
+  * @retval         none
+  */
+void OTG_FS_IRQHandler(void);
 
 #endif
 

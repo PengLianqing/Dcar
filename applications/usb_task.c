@@ -17,24 +17,29 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usb_task.h"
-
+//FreeRTOS
+#include "FreeRTOS.h"
+#include "task.h"
+//usb
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
-
+//string
 #include <stdio.h>
 #include <stdarg.h>
 #include "string.h"
-
+//led
 #include "bsp_led.h"
 
-#include "FreeRTOS.h"
-#include "task.h"
-
-
-static void usb_printf(const char *fmt,...);
+/**
+  * @brief          usb printf buffer
+  */
 static uint8_t usb_buf[256];
 
-//usb task
+/**
+  * @brief          usb task
+  * @param[in]      pvParameters: NULL
+  * @retval         none
+  */
 void usb_task(void *pvParameters)
 {
 	MX_USB_DEVICE_Init();
@@ -42,12 +47,16 @@ void usb_task(void *pvParameters)
 	{
 		vTaskDelay(100);
 		led3_toggle();
-		usb_printf("Hello-world\n");
+		usb_printf("Hello-world\r\n");
 		
 	}
 }
 
-//usb printf
+/**
+  * @brief          usb printf
+  * @param[in]      用法同printf()
+  * @retval         none
+  */
 static void usb_printf(const char *fmt,...)
 {
     static va_list ap;
@@ -62,6 +71,12 @@ static void usb_printf(const char *fmt,...)
     CDC_Transmit_FS(usb_buf, len);
 }
 
+
+/**
+  * @brief          usb的中断服务函数
+  * @param[in]      none
+  * @retval         none
+  */
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 void OTG_FS_IRQHandler(void)
 {
