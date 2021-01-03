@@ -87,6 +87,7 @@ void pid_clear(pid_t* pid);
 /*defined PID*/
 extern pid_t pid_6020_moto1_velocity;
 extern pid_t pid_6020_moto1_position;
-		
+pid_t *get_moto1_position_pid_point(void);
+pid_t *get_moto1_velocity_pid_point(void);
 #endif
 

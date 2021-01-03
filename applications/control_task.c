@@ -68,7 +68,7 @@ void init_task(void *pvParameters)
 	//创建remote control任务
 	xTaskCreate( usb_task, 		/* 任务函数 */
 							"usb_task", 	/* 任务名 */
-							128, 											/* 任务栈大小，单位word，也就是4字节 */
+							256, 											/* 任务栈大小，单位word，也就是4字节 */
 							NULL, 										/* 任务参数 */
 							2, 												/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
 							&xHandleUSB ); 		/* 任务句柄 */
