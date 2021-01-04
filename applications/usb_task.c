@@ -57,9 +57,13 @@ void usb_task(void *pvParameters)
 		vTaskDelay(10);
 		led3_toggle();
 		
+		static TickType_t xTimeNow;
+		xTimeNow = xTaskGetTickCountFromISR();
+		
 		//usb_printf("d:%4.2f,%4.2f\n",(float)(rand()%1024*1.0f) ,(float)(rand()%1024*1.0f));
 		usb_printf("S:%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f\n"
-				,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
+				,(float)(xTimeNow*1.0f)
+					//,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
 				//,(float)(volt_transmit.chassis_RC->rc.ch[1]*1.0f)
 				//,(float)(volt_transmit.chassis_RC->rc.ch[2]*1.0f)
 				,(float)(volt_transmit.moto_position[4].moto_target_angle*1.0f)

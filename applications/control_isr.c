@@ -19,23 +19,28 @@ void control_init(void)
 									5.0f,	0.0f,	10.0f	); 
 }
 
-
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
 moto_position_t moto_position[7];
 void moto_control_data_process(moto_position_t *moto,motor_measure_t *ptr)
 {
-	moto->control_time = 500.0f; //控制频率500Hz
+	
+	moto->control_time = 1000.0f; //电机信息发送频率1000Hz
 	
 	moto->moto_result_angle_last = moto->moto_result_angle;
 	moto->moto_result_angle = (float)(ptr->total_angle*360.0f*0.000122085215f);
 	
 	moto->moto_history_speed[1] = moto->moto_history_speed[0];
 	moto->moto_history_speed[0] = (moto->moto_result_angle - moto->moto_result_angle_last)*moto->control_time*60.0f/360.0f;
-	moto->moto_history_speed[0] = ptr->speed_rpm;
+	//moto->moto_history_speed[0] = ptr->speed_rpm;
+	
 	//moto->moto_history_speed[2] = moto->moto_history_speed[1];
 	//moto->moto_history_speed[3] = moto->moto_history_speed[2];
 	
 	//moto->moto_result_speed = (moto->moto_result_angle - moto->moto_result_angle_last)*moto->control_time;
-	moto->moto_result_speed = (moto->moto_history_speed[0]);//*0.4f + moto->moto_history_speed[1]*0.6f);
+	//moto->moto_result_speed = (moto->moto_history_speed[0]);//
+	moto->moto_result_speed = (moto->moto_history_speed[0]*0.4f + moto->moto_history_speed[1]*0.6f);
 }
 
 #define MaxVelocity 132.0f
@@ -125,7 +130,7 @@ void SoftTimer10HzCallback(TimerHandle_t xTimer)
 	BBB_data_send(&feedback_data);
 }
 
-void SoftTimer100HzCallback(TimerHandle_t xTimer)
+void SoftTimer200HzCallback(TimerHandle_t xTimer)
 {
 	static TickType_t xTimeNow;
 	xTimeNow = xTaskGetTickCount();
@@ -145,8 +150,6 @@ void SoftTimer1000HzCallback(TimerHandle_t xTimer)
 	
 	led1_toggle();	
 	M6020_Moto1_Measure = get_6020_moto1_measure_point();
-	
-	moto_control_data_process(&moto_position[4],&motor_chassis[4]);
 	#if TRIAL_MODE
 //	if(rc_ctrl.rc.s[0]==3)
 //	{

@@ -260,6 +260,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             //get motor id
             i = rx_header.StdId - CAN_3508_M1_ID;
             moto_data_process(&motor_chassis[i], rx_data);
+						moto_control_data_process(&moto_position[i],&motor_chassis[i]);
 						//freertos·¢ËÍhook  
 						//detect_hook(CHASSIS_MOTOR1_TOE + i);
             break;
