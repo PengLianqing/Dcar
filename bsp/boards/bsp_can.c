@@ -321,5 +321,5 @@ void CAN_cmd_can2(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4
   */
 const motor_measure_t *get_6020_moto1_measure_point(void)
 {
-    return &motor_chassis[4];
+    return &motor_chassis[0];
 }

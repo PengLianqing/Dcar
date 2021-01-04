@@ -76,3 +76,8 @@ void led2_toggle(void)
 {
 	HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_10);
 }
+
+void led3_toggle(void)
+{
+	HAL_GPIO_TogglePin(GPIOH, GPIO_PIN_11);
+}

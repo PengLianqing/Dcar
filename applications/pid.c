@@ -181,10 +181,9 @@ void PID_struct_init(
     pid->f_param_init(pid, mode, maxout, intergral_limit, kp, ki, kd);
 }
 
-pid_t pid_6020_moto1_velocity;
-pid_t pid_6020_moto1_position;
-
 void pid_test_init(){
 	
 	//为了解决上位机调参的时候第一次赋值的时候清零其他参数， 应该提前把参数表填充一下！
 }
+
+
