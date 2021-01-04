@@ -35,7 +35,10 @@
   */
 static uint8_t usb_buf[256];
 
-volt_transmit_t volt_transmit; //volt+数据指针
+/**
+  * @brief          volt+数据指针
+  */
+volt_transmit_t volt_transmit; 
 
 /**
   * @brief          usb task
