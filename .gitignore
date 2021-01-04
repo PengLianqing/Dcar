@@ -2,5 +2,7 @@
 *.a
 *.d
 remote_control.uvguix.Administrator
-/beagbone/*/*.o
-/beagbone/*/*/*.o
+/beagbone/**/*.o
+/beagbone/**/*.out
+/beagbone/**/server
+/beagbone/**/client
