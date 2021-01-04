@@ -9,11 +9,14 @@ pid_t pid_6020_moto1_position;
 void control_init(void)
 {
 	
-	PID_struct_init(&pid_6020_moto1_velocity, DELTA_PID, 20000.0, 10000.0,
+	PID_struct_init(&pid_6020_moto1_velocity, DELTA_PID, 30000.0, 10000.0,
 									//10.0f,	25.0f,	0.0f	); 
-									6.0f,	15.0f,	0.0f	); 
+									//6.0f,	15.0f,	0.0f
+									//10.0f,	15.0f,	1.0f	); 
+									6.0f,	10.0f,	2.0f	); 
 	PID_struct_init(&pid_6020_moto1_position, POSITION_PID, 300.0, 100.0,
-									10.0f,	0.0f,	1.0f	); 
+									//10.0f,	0.0f,	1.0f	); 
+									5.0f,	0.0f,	10.0f	); 
 }
 
 
@@ -27,12 +30,12 @@ void moto_control_data_process(moto_position_t *moto,motor_measure_t *ptr)
 	
 	moto->moto_history_speed[1] = moto->moto_history_speed[0];
 	moto->moto_history_speed[0] = (moto->moto_result_angle - moto->moto_result_angle_last)*moto->control_time*60.0f/360.0f;
-	
+	moto->moto_history_speed[0] = ptr->speed_rpm;
 	//moto->moto_history_speed[2] = moto->moto_history_speed[1];
 	//moto->moto_history_speed[3] = moto->moto_history_speed[2];
 	
 	//moto->moto_result_speed = (moto->moto_result_angle - moto->moto_result_angle_last)*moto->control_time;
-	moto->moto_result_speed = (moto->moto_history_speed[0]*0.4f + moto->moto_history_speed[1]*0.6f);
+	moto->moto_result_speed = (moto->moto_history_speed[0]);//*0.4f + moto->moto_history_speed[1]*0.6f);
 }
 
 #define MaxVelocity 132.0f
@@ -79,7 +82,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(time%10==0)
 		{
 		/***************************100HZ***********************/
-			rc_ctrl_target = (float)(rc_ctrl_last*0.6f)+(float)(rc_ctrl.rc.ch[0]*0.4f);
+			rc_ctrl_target = (float)(rc_ctrl.rc.ch[0]*1.0f);//(float)(rc_ctrl_last*0.9f)+(float)(rc_ctrl.rc.ch[0]*0.1f);
 			moto_position[4].moto_target_angle = (rc_ctrl_target*360.0f/660.0f);
 			rc_ctrl_last = rc_ctrl.rc.ch[0];
 			
@@ -129,12 +132,12 @@ void SoftTimer100HzCallback(TimerHandle_t xTimer)
 	
 	static int16_t rc_ctrl_last=0;
 	float rc_ctrl_target = 0.0f;
-	rc_ctrl_target = (float)(rc_ctrl_last*0.6f)+(float)(rc_ctrl.rc.ch[0]*0.4f);
-	moto_position[4].moto_target_angle = (rc_ctrl_target*360.0f/660.0f);
+	rc_ctrl_target = (float)(rc_ctrl_last*0.9f)+(float)(rc_ctrl.rc.ch[0]*0.1f);
+	moto_position[4].moto_target_angle = (rc_ctrl_target*180.0f/660.0f);
 	rc_ctrl_last = rc_ctrl.rc.ch[0];
 }
 
-#define TRIAL_MODE 0
+#define TRIAL_MODE 1
 void SoftTimer1000HzCallback(TimerHandle_t xTimer)
 {
 	static TickType_t xTimeNow;
@@ -145,12 +148,36 @@ void SoftTimer1000HzCallback(TimerHandle_t xTimer)
 	
 	moto_control_data_process(&moto_position[4],&motor_chassis[4]);
 	#if TRIAL_MODE
+//	if(rc_ctrl.rc.s[0]==3)
+//	{
+//		moto_position[4].moto_target_angle = 0.0f;
+//	}
+//	else if(rc_ctrl.rc.s[0]==1)
+//	{
+//		moto_position[4].moto_target_angle = 180.0f;
+//	}
+//	else if(rc_ctrl.rc.s[0]==2)
+//	{
+//		moto_position[4].moto_target_angle = -360.0f;
+//	}
 	pid_calc(&pid_6020_moto1_position,moto_position[4].moto_result_angle,moto_position[4].moto_target_angle);
 	
 	moto_position[4].moto_target_speed = pid_6020_moto1_position.pos_out;
 	pid_calc(&pid_6020_moto1_velocity,moto_position[4].moto_result_speed,moto_position[4].moto_target_speed);
 	CAN_cmd_can1(pid_6020_moto1_velocity.delta_out,0,0,0);
 	#else
+	if(rc_ctrl.rc.s[0]==3)
+	{
+		moto_position[4].moto_target_speed = 0.0f;
+	}
+	else if(rc_ctrl.rc.s[0]==1)
+	{
+		moto_position[4].moto_target_speed = 100.0f;
+	}
+	else if(rc_ctrl.rc.s[0]==2)
+	{
+		moto_position[4].moto_target_speed = 200.0f;
+	}
 	pid_calc(&pid_6020_moto1_velocity,moto_position[4].moto_result_speed,moto_position[4].moto_target_speed);
 	CAN_cmd_can1(pid_6020_moto1_velocity.delta_out,0,0,0);
 	#endif

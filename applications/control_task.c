@@ -82,7 +82,7 @@ void init_task(void *pvParameters)
 							&xHandleTest ); 		/* 任务句柄 */
 	
 	//创建soft timer任务1000Hz
-	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)1,
+	SoftTimer1000HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)2,
 																(UBaseType_t )pdTRUE, //周期定时器
 																(void*)1, //定时器ID
 																(TimerCallbackFunction_t)SoftTimer1000HzCallback); //周期定时器，周期1ms(1个时钟节拍)，周期模式
