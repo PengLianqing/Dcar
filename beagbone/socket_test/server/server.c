@@ -72,9 +72,9 @@ int main()
             printf("read %d \n",ret);
             Write(STDOUT_FILENO ,buf ,ret);
 
-            sprintf(buf ,"Server write: %4d\n" ,rand()%1024);
-            Write(cfd ,buf ,sizeof("Server write: %4d\n"));
-            Write(STDOUT_FILENO ,buf ,sizeof("Server write: %4d\n"));
+            sprintf(buf ,"Server:%5.2f,%5.2f,%d,%d\n" ,(float)(rand()%1024*1.0f) ,(float)(rand()%1024*1.0f) ,rand()%1024 ,rand()%1024);
+            Write(cfd ,buf ,strlen(buf));
+            memset(buf ,0 ,strlen(buf));
         }
         close(cfd);
         printf("disconnect from client.\n");
