@@ -2,3 +2,5 @@
 *.a
 *.d
 remote_control.uvguix.Administrator
+/beagbone/*/*.o
+/beagbone/*/*/*.o
