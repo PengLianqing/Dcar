@@ -49,29 +49,27 @@ void usb_task(void *pvParameters)
 {
 	MX_USB_DEVICE_Init();
 	
-	//volt+初始化
+	//volt+数据初始化
 	volt_init(&volt_transmit);
 	
 	while(1)
 	{
-		vTaskDelay(10);
-		led3_toggle();
-		
 		static TickType_t xTimeNow;
-		xTimeNow = xTaskGetTickCountFromISR();
+		xTimeNow = xTaskGetTickCountFromISR(); //整型
 		
 		//usb_printf("d:%4.2f,%4.2f\n",(float)(rand()%1024*1.0f) ,(float)(rand()%1024*1.0f));
-		usb_printf("S:%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f\n"
-				,(float)(xTimeNow*1.0f)
-					//,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
-				//,(float)(volt_transmit.chassis_RC->rc.ch[1]*1.0f)
-				//,(float)(volt_transmit.chassis_RC->rc.ch[2]*1.0f)
-				,(float)(volt_transmit.moto_position[4].moto_target_angle*1.0f)
-				,(float)(volt_transmit.moto_position[4].moto_result_angle*1.0f)
-				,(float)(volt_transmit.moto_position[4].moto_target_speed*1.0f)
-				,(float)(volt_transmit.moto_position[4].moto_result_speed*1.0f)
-				,(float)(volt_transmit.pid_position->err[0]*1.0f)
-				,(float)(volt_transmit.pid_velocity->err[0]*1.0f)	);
+		usb_printf("S:%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%ld\n"
+				/*RC通道0 			*/,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
+				/*目标控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_target_angle*1.0f)
+				/*实际控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_result_angle*1.0f)
+				/*目标控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_target_speed*1.0f)
+				/*实际控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_result_speed*1.0f)
+				/*位置环pid err */,(float)(volt_transmit.pid_position->err[0]*1.0f)
+				/*速度环pid err */,(float)(volt_transmit.pid_velocity->err[0]*1.0f)	
+				/*系统运行时间 	*/,xTimeNow);
+			
+		led3_toggle();
+		vTaskDelay(10);
 	}
 }
 
@@ -121,10 +119,8 @@ static void volt_init(volt_transmit_t *volt_transmit)
 {
 	volt_transmit->chassis_RC = get_remote_control_point();
 	volt_transmit->motor_measure = get_6020_moto1_measure_point();
-	//volt_transmit->motor_measure[0].angle;
 	volt_transmit->moto_position = get_moto1_position_point();
-	//volt_transmit->moto_position[0].moto_history_speed;
-	volt_transmit->pid_position = 0;//get_moto1_position_pid_point();
+	volt_transmit->pid_position = get_moto1_position_pid_point();
 	volt_transmit->pid_velocity = get_moto1_velocity_pid_point();
 }
 

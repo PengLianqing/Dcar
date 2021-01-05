@@ -96,7 +96,7 @@ void init_task(void *pvParameters)
 	xTimerStart(SoftTimer200HzHandle,0); //开启周期定时器
 	
 	//创建soft timer任务10Hz																
-	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)100,
+	SoftTimer10HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)10,
 																(UBaseType_t )pdTRUE, //周期定时器
 																(void*)3, //定时器ID
 																(TimerCallbackFunction_t)SoftTimer10HzCallback); //周期定时器，周期100ms(100个时钟节拍)，周期模式
