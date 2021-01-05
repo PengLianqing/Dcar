@@ -7,6 +7,7 @@
 #include <termios.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 
 //根据具体的设备修改
 const char default_path[] = "/dev/ttyO2";
@@ -34,7 +35,7 @@ struct feedback_data_t{
 struct feedback_data_t feedback_data;
 struct feedback_data_t translate_data;
 
-char tx_buf[34];
+char tx_buf[128];
 
 int i=0;
 
@@ -44,7 +45,7 @@ int i=0;
 int main(int argc, char *argv[])
 {
 	int fd;
-	int res;
+	int res = -1;
 	struct termios opt;
 	char *path;
 	char buf[98] = "Embedfire tty send test.\n";
@@ -88,33 +89,10 @@ int main(int argc, char *argv[])
 
 	printf("receive %d , %s\n", res , buf);
 	static int receive_num[2]={0,0};
-	
+	//static int j=1000;
 	while(1)
 	{
-		//sleep(1);
-		//sprintf(buf,"translate %d , %5.2f \n",i,rand()%1024*0.1f);
-		//res = write(fd, buf, sizeof(buf));
-		//printf("write %d,%s\n",res,buf);
-		
-		/*read*/
-		#ifdef USE_READ
-		res = read(fd,buf,98);
-		#define RS232_RX_BUF_LEN (sizeof(struct feedback_data_t)+1) 
 
-		if(res >0)
-		{
-			receive_num[0] ++;
-		}
-		if(res == (RS232_RX_BUF_LEN) && buf[RS232_RX_BUF_LEN-1] == '\n')
-		{
-			receive_num[1] ++;
-			memcpy((void*)(&feedback_data), (void*)(buf), sizeof(struct feedback_data_t));
-			printf("receive %d, date:%5.2f , %d ",res ,feedback_data.imu_angel[0] ,feedback_data.mode0);
-			printf("------available data: %5.2f\r\n",(float)(receive_num[1])/(float)(receive_num[0]));
-		}
-		#endif
-
-		usleep(20000);
 		/*write*/
 		#ifdef USE_WRITE
 		control_date.data1 = rand()%1024;
@@ -123,22 +101,66 @@ int main(int argc, char *argv[])
 		control_date.data4 = (float)(rand()%1024*0.1f);
 		control_date.mode1 = rand()%3;
 		control_date.mode2 = rand()%3;
+
 		//打包发送会出现接受错误
 		//memcpy((void*)(tx_buf), (void*)(&control_date), sizeof(struct control_date_t));
 		//tx_buf[sizeof(struct control_date_t)] = '\n';
 		//res = write(fd, tx_buf, sizeof(struct control_date_t)+1);
-		sprintf(tx_buf,"B:%d , %d ,%5.2f ,%5.2f ,%d ,%d \n",control_date.data1,control_date.data2,control_date.data3,control_date.data4,control_date.mode1,control_date.mode2);
-		res = write(fd, tx_buf, sizeof(tx_buf));
-		printf("translate %d\r\n",res);
+		
+		memset(tx_buf ,0 ,sizeof(tx_buf));
+		static int i=0;
+		sprintf(tx_buf,"\nB:%d,%d,%5.2f,%5.2f,%d,%d$\n",control_date.data1,control_date.data2,control_date.data3,control_date.data4,control_date.mode1,i++);
+		
+		res = write(fd, tx_buf, strlen(tx_buf));
+		printf("translate %d,%s\r\n",res,tx_buf);
+		#endif
+
+		//sleep(1);
+		//sprintf(buf,"translate %d , %5.2f \n",i,rand()%1024*0.1f);
+		//res = write(fd, buf, sizeof(buf));
+		//printf("write %d,%s\n",res,buf);
+		
+		/*read*/
+		#define USE_PRINTF_TRANSLATE 1
+		#if USE_PRINTF_TRANSLATE
+			char receivebuf[256];
+			res = read(fd,receivebuf,sizeof(receivebuf));
+			printf("###############receive data %d\n",res);
+			if(res >0)
+			{
+				receive_num[0] ++;
+			}
+			if( receivebuf[res-1] == '\n')
+			{
+				receive_num[1] ++;
+				printf("receive %s",receivebuf ,strlen(receivebuf));
+				printf("------available data: %5.2f\n",(float)(receive_num[1])/(float)(receive_num[0]));
+			}
+			memset(receivebuf ,0 ,strlen(receivebuf));
+		#else
+			res = read(fd,buf,98);
+			printf("###############receive data %d\n",res);
+			#define RS232_RX_BUF_LEN (sizeof(struct feedback_data_t)+1) 
+			if(res >0)
+			{
+				receive_num[0] ++;
+			}
+			if(res == (RS232_RX_BUF_LEN) && buf[RS232_RX_BUF_LEN-1] == '\n')
+			{
+				receive_num[1] ++;
+				memcpy((void*)(&feedback_data), (void*)(buf), sizeof(struct feedback_data_t));
+				printf("receive %d, date:%5.2f , %d ",res ,feedback_data.imu_angel[0] ,feedback_data.mode0);
+				printf("------available data: %5.2f\r\n",(float)(receive_num[1])/(float)(receive_num[0]));
+			}
+			memset(buf ,0 ,98);
 		#endif
 		
-		//sprintf(tx_buf,"B:%d , %d ,%5.2f ,%5.2f\n",i,i,rand()%1024*0.1f,rand()%1024*0.1f);
-		//res = write(fd, tx_buf, sizeof(tx_buf));
-		//printf("translate %d , %d ,%s\r\n",res,sizeof(tx_buf),tx_buf);
-
+		//usleep(80000); //此处加延时的话数据会在缓冲区堆积
+		
+		
 	}
 	printf("read error,res = %d",res);
-
+	tcflush(fd, TCIOFLUSH);
 	close(fd);
 	return 0;
 }

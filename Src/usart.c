@@ -206,9 +206,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 
-//receive data, 18 bytes one frame, but set 36 bytes 
-//接收原始数据，为18个字节，给了36个字节长度，防止DMA传输越界
-#define RS232_RX_BUF_NUM 2*(sizeof(struct feedback_data_t)+1)
+
 uint8_t rs232_rx_buf[2][RS232_RX_BUF_NUM];
 
 void CT_init(uint8_t *rx1_buf, uint8_t *rx2_buf, uint16_t dma_buf_num)
@@ -254,11 +252,10 @@ void RS232_init()
 	RS232_UART1_Init();
 	CT_init(rs232_rx_buf[0], rs232_rx_buf[1], RS232_RX_BUF_NUM);
 }
-
+#include "usb_task.h"
 char tooler[100];
-char rs232_receive[34];
-//串口中断
-#define RS232_FRAME_LENGTH sizeof(struct feedback_data_t)+1
+char rs232_receive[RS232_RX_BUF_NUM];
+
 void USART1_IRQHandler(void)
 {
     if(huart1.Instance->SR & UART_FLAG_RXNE)//接收到数据
@@ -281,11 +278,11 @@ void USART1_IRQHandler(void)
 
             //get receive data length, length = set_data_length - remain_length
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = RS232_FRAME_LENGTH - hdma_usart1_rx.Instance->NDTR;
+            this_time_rx_len = RS232_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
 
             //reset set_data_lenght
             //重新设定数据长度
-            hdma_usart1_rx.Instance->NDTR = RS232_FRAME_LENGTH;
+            hdma_usart1_rx.Instance->NDTR = RS232_RX_BUF_NUM;
 
             //set memory buffer 1
             //设定缓冲区1
@@ -295,11 +292,26 @@ void USART1_IRQHandler(void)
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
 
-            if(this_time_rx_len == 22 && rs232_rx_buf[0][33] == '\n')//RS232_FRAME_LENGTH)
-            {
-                //数据处理函数
-								BBB_data_receive(rs232_rx_buf[0],rs232_receive);
-            }
+						//对DMA数组中的数据进行鉴别和处理
+						for(int j=128 ;j>0 ;j--)
+						{
+							if( rs232_rx_buf[0][j]=='$' )
+							{
+								for(int i=j ;i>0 ;i--)
+								{
+									if( rs232_rx_buf[0][i]=='B' && rs232_rx_buf[0][i+1]==':' )
+									{
+										BBB_data_receive(&(rs232_rx_buf[0][i]),rs232_receive);
+										sprintf(tooler ,"%s\r\n" ,&(rs232_rx_buf[1][i]));
+									}
+								}
+							}
+						}
+//            if( (rs232_rx_buf[0][0] == '\n' && rs232_rx_buf[1][1] == 'B')||(rs232_rx_buf[0][this_time_rx_len-1] == '\n' && rs232_rx_buf[0][this_time_rx_len-2] == '$') )
+//            {
+//                //数据处理函数
+//								BBB_data_receive(rs232_rx_buf[0],rs232_receive);
+//            }
         }
         else
         {
@@ -310,11 +322,11 @@ void USART1_IRQHandler(void)
 
             //get receive data length, length = set_data_length - remain_length
             //获取接收数据长度,长度 = 设定长度 - 剩余长度
-            this_time_rx_len = SBUS_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
+            this_time_rx_len = RS232_RX_BUF_NUM - hdma_usart1_rx.Instance->NDTR;
 
             //reset set_data_lenght
             //重新设定数据长度
-            hdma_usart1_rx.Instance->NDTR = SBUS_RX_BUF_NUM;
+            hdma_usart1_rx.Instance->NDTR = RS232_RX_BUF_NUM;
 
             //set memory buffer 0
             //设定缓冲区0
@@ -324,16 +336,34 @@ void USART1_IRQHandler(void)
             //enable DMA
             //使能DMA
             __HAL_DMA_ENABLE(&hdma_usart1_rx);
-
-            if(this_time_rx_len == 22 && rs232_rx_buf[1][33] == '\n')//RS232_FRAME_LENGTH)
-            {
-                //处理数据
-                BBB_data_receive(rs232_rx_buf[1],rs232_receive);
-            }
+						
+						//对DMA数组中的数据进行鉴别和处理
+						for(int j=128 ;j>0 ;j--)
+						{
+							if( rs232_rx_buf[1][j]=='$' )
+							{
+								for(int i=j ;i>0 ;i--)
+								{
+									if( rs232_rx_buf[1][i]=='B' && rs232_rx_buf[1][i+1]==':' )
+									{
+										BBB_data_receive(&(rs232_rx_buf[1][i]),rs232_receive);
+										sprintf(tooler ,"%s\r\n" ,&(rs232_rx_buf[1][i]));
+									}
+								}
+							}
+						}
+//            if( (rs232_rx_buf[1][0] == '\n' && rs232_rx_buf[1][1] == 'B')||(rs232_rx_buf[1][this_time_rx_len-1] == '\n' && rs232_rx_buf[1][this_time_rx_len-2] == '$') )
+//            {
+//                //处理数据
+//                BBB_data_receive(rs232_rx_buf[1],rs232_receive);
+//            }
         }
-				sprintf(tooler ,"%d , %d\r\n" ,this_time_rx_len ,RS232_FRAME_LENGTH);
+				
+				//this_time_rx_len是DMA接收到的数据长度
+				//sprintf(tooler ,"%d , %d\r\n" ,this_time_rx_len ,RS232_FRAME_LENGTH);			
     }
 }
+
 
 //不使用双缓冲机制
 //void USART1_IRQHandler(void)
@@ -376,36 +406,5 @@ void USART1_IRQHandler(void)
 //        }
 //    }
 //}
-
-//RS232数据处理函数
-void rs232_to_ct()
-{
-	
-}
-
-struct feedback_data_t feedback_data;
-struct feedback_data_t feedback_data_recv;
-
-#define RS232_TX_BUF_NUM 98
-char rs232_tx_buf[RS232_TX_BUF_NUM];
-void BBB_data_send(struct feedback_data_t* pData)
-{
-	//二进制方式传输数据
-	memcpy((void*)(rs232_tx_buf), (void*)(pData), sizeof(struct feedback_data_t));
-	rs232_tx_buf[sizeof(struct feedback_data_t)] = '\n';
-	HAL_UART_Transmit(&huart1, rs232_tx_buf, sizeof(struct feedback_data_t)+1,10);
-	
-	//字符串方式传输数据
-	//sprintf(rs232_tx_buf,"translate %d , %5.2f \r\n",10,rand()%1024*0.1f);
-	//HAL_UART_Transmit(&huart1, rs232_tx_buf, RS232_TX_BUF_NUM, 10);
-}
-
-
-struct control_date_t control_date;
-void BBB_data_receive(uint8_t *rx_buf, char* pData)
-{
-	memcpy((void*)(pData), (void*)(rx_buf), 34);
-	sscanf(rx_buf , "B:%d , %d ,%f ,%f ,%d ,%d \n",&control_date.data1,&control_date.data2,&control_date.data3,&control_date.data4,&control_date.mode1,&control_date.mode2);
-}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

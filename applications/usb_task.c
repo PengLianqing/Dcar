@@ -56,18 +56,35 @@ void usb_task(void *pvParameters)
 	{
 		static TickType_t xTimeNow;
 		xTimeNow = xTaskGetTickCountFromISR(); //整型
-		
+		/*
+		用于测试usbprintf......
+		*/
 		//usb_printf("d:%4.2f,%4.2f\n",(float)(rand()%1024*1.0f) ,(float)(rand()%1024*1.0f));
-		usb_printf("S:%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%ld\n"
-				/*RC通道0 			*/,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
-				/*目标控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_target_angle*1.0f)
-				/*实际控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_result_angle*1.0f)
-				/*目标控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_target_speed*1.0f)
-				/*实际控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_result_speed*1.0f)
-				/*位置环pid err */,(float)(volt_transmit.pid_position->err[0]*1.0f)
-				/*速度环pid err */,(float)(volt_transmit.pid_velocity->err[0]*1.0f)	
-				/*系统运行时间 	*/,xTimeNow);
-			
+		
+		/*
+		用于在线调参观察响应曲线......
+		*/
+//		usb_printf("S:%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%4.2f,%ld\n"
+//				/*RC通道0 			*/,(float)(volt_transmit.chassis_RC->rc.ch[0]*1.0f)
+//				/*目标控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_target_angle*1.0f)
+//				/*实际控制角度 	*/,(float)(volt_transmit.moto_position[4].moto_result_angle*1.0f)
+//				/*目标控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_target_speed*1.0f)
+//				/*实际控制速度 	*/,(float)(volt_transmit.moto_position[4].moto_result_speed*1.0f)
+//				/*位置环pid err */,(float)(volt_transmit.pid_position->err[0]*1.0f)
+//				/*速度环pid err */,(float)(volt_transmit.pid_velocity->err[0]*1.0f)	
+//				/*系统运行时间 	*/,xTimeNow);
+		
+		/*
+		用于查看beagbone发回来的数据，beagbone会把收到的数据打乱、打包重新发回来......
+		*/
+		//usb_printf("-------Beagbone1:%s@@\r\n#########Beagbone2:%s$$\r\n",rs232_rx_buf[0] ,rs232_rx_buf[1]);
+		
+		/*
+		用于查看beagbone发回来的数据的解析结果......
+		*/
+		usb_printf("--#######-------#########Beagbone:%d,%d,%5.2f,%5.2f,%d,%d$\r\n",
+			control_date.data1,control_date.data2,control_date.data3,control_date.data4,control_date.mode1,control_date.mode2);
+		
 		led3_toggle();
 		vTaskDelay(10);
 	}
@@ -78,7 +95,7 @@ void usb_task(void *pvParameters)
   * @param[in]      用法同printf()
   * @retval         none
   */
-static void usb_printf(const char *fmt,...)
+void usb_printf(const char *fmt,...)
 {
     static va_list ap;
     uint16_t len = 0;

@@ -597,6 +597,11 @@
               <FileType>1</FileType>
               <FilePath>..\applications\usb_task.c</FilePath>
             </File>
+            <File>
+              <FileName>beagbone_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\applications\beagbone_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

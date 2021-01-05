@@ -1,28 +1,44 @@
-#include "control_isr.h"
-#include "math.h"
-#include "pid.h"
+/**
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+  * @file       control_isr.c/h
+  * @brief      FreeRTOS任务
+  * @note       
+  * @history
+  *  Version    Date            Author          Modification
+  *  V1.0.0     Jan-1-2021      Peng            1. 完成
+  *
+  @verbatim
+  ==============================================================================
 
-#include "usb_task.h"
+  ==============================================================================
+  @endverbatim
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+	*/
+#include "control_isr.h"
 
 pid_t pid_6020_moto1_velocity;
 pid_t pid_6020_moto1_position;
+/**
+  * @brief          初始化pid指针
+  * @param[in]      pid指针、参数
+  * @retval         null
+  */
 void control_init(void)
 {
 	
 	PID_struct_init(&pid_6020_moto1_velocity, DELTA_PID, 30000.0, 10000.0,
-									//10.0f,	25.0f,	0.0f	); 
-									//6.0f,	15.0f,	0.0f
-									//10.0f,	15.0f,	1.0f	); 
 									6.0f,	10.0f,	2.0f	); 
 	PID_struct_init(&pid_6020_moto1_position, POSITION_PID, 300.0, 100.0,
-									//10.0f,	0.0f,	1.0f	); 
 									5.0f,	0.0f,	10.0f	); 
 }
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "timers.h"
 moto_position_t moto_position[7];
+
+/**
+  * @brief          处理电机原始数据
+  * @param[in]      电机控制数据指针, 电机原始数据指针
+  * @retval         null
+  */
 void moto_control_data_process(moto_position_t *moto,motor_measure_t *ptr)
 {
 	
@@ -37,110 +53,18 @@ void moto_control_data_process(moto_position_t *moto,motor_measure_t *ptr)
 	//使用can传回来的速度值.
 	//moto->moto_history_speed[0] = ptr->speed_rpm;
 	
-	//moto->moto_history_speed[2] = moto->moto_history_speed[1];
-	//moto->moto_history_speed[3] = moto->moto_history_speed[2];
-	
-	//moto->moto_result_speed = (moto->moto_result_angle - moto->moto_result_angle_last)*moto->control_time;
-	//moto->moto_result_speed = (moto->moto_history_speed[0]);//
 	moto->moto_result_speed = (moto->moto_history_speed[0]*0.4f + moto->moto_history_speed[1]*0.6f);
 }
 
 #define MaxVelocity 132.0f
 #define MaxPosition 8191
 const motor_measure_t *M6020_Moto1_Measure;
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	static int time=0;
-	if(htim==(&htim2))
-	{
-		if(++time>=1000 ) time=0;
-		/****************************1000HZ***********************/
-		/****************************1000HZ***********************/
-		if(time%2==0)
-		{
-		/***************************500HZ***********************/
-		/***************************500HZ***********************/
-		}
-		if(time%5==0)
-		{
-		/***************************200HZ***********************/		
-		/***************************200HZ***********************/
-		}
-		if(time%10==0)
-		{
-		/***************************100HZ***********************/
-		/***************************100HZ***********************/
-		}
-		if(time%100==0)
-		{
-		/***************************10HZ************************/
-		/***************************10HZ************************/
-		}
-	}
-}
-#include "FreeRTOS.h"
-#include "timers.h"
-
 /**
-  * @brief          与beagbone进行数据通信.
-  * @param[in]      none
-  * @retval         电机控制数据指针
+  * @brief          freertos 200hz 软件定时器任务
+	* 实现遥控数据的平滑、变换、限位处理
+  * @param[in]      null
+  * @retval         null
   */
-extern UART_HandleTypeDef huart1;
-#define USE_PRINTF_TRANSLATE 1
-void SoftTimer10HzCallback(TimerHandle_t xTimer)
-{
-	/*
-	要发送的数据：
-	程序运行数据.xTimeNow ,imu_angel[0] ,imu_angel[1] ,imu_angel[2]
-	电机控制数据.moto_position.result_angle ,
-	指令数据.mode0 ,mode1 ,channel[0] ,channel[1]
-	*/
-	static TickType_t xTimeNow;
-	xTimeNow = xTaskGetTickCount();
-	char buf[256];
-	#if USE_PRINTF_TRANSLATE
-	
-//		sprintf("D:%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d\n",
-//		(float)(rand()%1024*0.1f),
-//		(float)(rand()%1024*0.1f),
-//		(float)(rand()%1024*0.1f),
-//		(float)(rand()%1024*0.1f),
-//		(float)(rand()%1024*0.1f),
-//		(float)(rand()%1024*0.1f),
-//		rand()%1024,
-//		rand()%1024,
-//		rand()%1024,
-//		rand()%1024,
-//		rand()%1024,
-//		rand()%1024
-//		);		
-		sprintf(buf ,"D:%.2f,%.2f,%.2f,%d,%d,%d\n",
-		(float)(rand()%1024*0.1f),
-		(float)(rand()%1024*0.1f),
-		(float)(rand()%1024*0.1f),
-		rand()%1024,
-		rand()%1024,
-		xTimeNow
-		);		
-		HAL_UART_Transmit(&huart1, buf, strlen(buf),10);
-	
-	#else
-	
-		feedback_data.channel[0]=1.0;//rand()%1024;
-		feedback_data.channel[1]=rand()%1024;
-		feedback_data.channel[2]=rand()%1024;
-		feedback_data.imu_angel [0] = 1;//(float)(rand()%1024*0.1f);
-		feedback_data.imu_angel [1] = (float)(rand()%1024*0.1f);
-		feedback_data.imu_angel [2] = (float)(rand()%1024*0.1f);
-		feedback_data.mode0 = rand()%3;
-		feedback_data.mode1 = rand()%3;
-		BBB_data_send(&feedback_data);
-	
-	#endif
-}
-
 void SoftTimer200HzCallback(TimerHandle_t xTimer)
 {
 	static TickType_t xTimeNow;
@@ -162,8 +86,14 @@ void SoftTimer200HzCallback(TimerHandle_t xTimer)
 	rc_ctrl_last = rc_ctrl.rc.ch[0];
 }
 
+/**
+  * @brief          freertos 500hz 软件定时器任务
+	* 实现电机控制
+  * @param[in]      null
+  * @retval         null
+  */
 #define TRIAL_MODE 1
-void SoftTimer1000HzCallback(TimerHandle_t xTimer)
+void SoftTimer500HzCallback(TimerHandle_t xTimer)
 {
 	static TickType_t xTimeNow;
 	xTimeNow = xTaskGetTickCount();

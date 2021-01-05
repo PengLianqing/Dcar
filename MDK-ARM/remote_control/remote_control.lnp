@@ -37,6 +37,7 @@
 "remote_control\remote_control.o"
 "remote_control\control_task.o"
 "remote_control\usb_task.o"
+"remote_control\beagbone_task.o"
 "remote_control\croutine.o"
 "remote_control\event_groups.o"
 "remote_control\list.o"

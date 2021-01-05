@@ -238,6 +238,7 @@ static uint8_t              chassis_can_send_data[8];
   * @param[in]      hcan:CAN句柄指针
   * @retval         none
   */
+#include "control_isr.h"
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
     CAN_RxHeaderTypeDef rx_header;
@@ -260,7 +261,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
             //get motor id
             i = rx_header.StdId - CAN_3508_M1_ID;
             moto_data_process(&motor_chassis[i], rx_data);
+						
+						//处理电机角度、转速等数据
 						moto_control_data_process(&moto_position[i],&motor_chassis[i]);
+					
 						//freertos发送hook  
 						//detect_hook(CHASSIS_MOTOR1_TOE + i);
             break;

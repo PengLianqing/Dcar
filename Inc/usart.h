@@ -26,6 +26,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#include "beagbone_task.h"
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -42,39 +44,11 @@ void MX_USART3_UART_Init(void);
 
 /* USER CODE END Prototypes */
 
-//接受的数据
-struct feedback_data_t{
-	float imu_angel[3]; //pitch,yaw,roll
-	float imu_speed[3];
-	int channel[3]; //前进，刹车，转向 -30000~+30000
-	int mode0;
-	int mode1;
-	int mode2;
-};
-extern struct feedback_data_t feedback_data;
-extern struct feedback_data_t feedback_data_recv;
-
-//发送的数据：
-struct control_date_t{
-	int data1;
-	int data2;
-	float data3;
-	float data4; //%5.2f -300.0f-300.0f
-	int mode1;
-	int mode2;
-};
-extern struct control_date_t control_date;
-
-//receive data, 18 bytes one frame, but set 36 bytes 
-//接收原始数据，为18个字节，给了36个字节长度，防止DMA传输越界
-#define RS232_RX_BUF_NUM 2*(sizeof(struct feedback_data_t)+1)
-extern uint8_t rs232_rx_buf[2][RS232_RX_BUF_NUM];
-
-void BBB_data_receive(uint8_t *rx_buf,  char* pData);
-void BBB_data_send(struct feedback_data_t* pData);
-
 extern char tooler[100];
-extern char rs232_receive[34];
+
+//接收原始数据，为128个字节
+#define RS232_RX_BUF_NUM 128
+
 #ifdef __cplusplus
 }
 #endif

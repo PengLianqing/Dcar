@@ -43,7 +43,7 @@ void usb_task(void *pvParameters);
   * @param[in]      用法同printf()
   * @retval         none
   */
-static void usb_printf(const char *fmt,...);
+void usb_printf(const char *fmt,...);
 
 /**
   * @brief          usb的中断服务函数
