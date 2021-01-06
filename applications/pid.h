@@ -1,30 +1,29 @@
-/******************************************************************************
-/// @brief
-/// @copyright Copyright (c) 2017 <dji-innovations, Corp. RM Dept.>
-/// @license MIT License
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction,including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense,and/or sell
-/// copies of the Software, and to permit persons to whom the Software is furnished
-/// to do so,subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-/// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
-*******************************************************************************/
+/**
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+  * @file				pid.c/h
+  * @version		V1.0.0
+  * @brief   		对于PID， 反馈/测量习惯性叫get/measure/real/fdb,
+						  期望输入一般叫set/target/ref 
+  * @history
+  *  Version    Date            Author          Modification
+  *  V1.0.0     Jan-1-2021      Peng            1. 完成
+  *
+  @verbatim
+  ==============================================================================
+
+  ==============================================================================
+  @endverbatim
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+	*/
+	
 #ifndef __pid_H
 #define __pid_H
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
+/**
+  * @brief          pid_t结构体与enum
+  */
 enum{
     LLAST	= 0,
     LAST 	= 1,
@@ -69,8 +68,51 @@ typedef struct __pid_t
                     float d);
     void (*f_pid_reset)(struct __pid_t *pid, float p, float i, float d);		//pid三个参数修改
 
-}pid_t;
+}pid_t; 
 
+/**
+  * @brief          用户定义的pid
+  */
+extern pid_t pid_6020_moto1_velocity;
+extern pid_t pid_6020_moto1_position;
+
+		
+/**
+  * @brief          中途更改参数设定(调试)
+  * @param[in]      *pid ,kp ,ki ,kd
+  * @retval         none
+  */
+static void pid_reset(pid_t	*pid, float kp, float ki, float kd);
+		
+/**
+  * @brief          清空pid计算数据
+  * @param[in]      *pid
+  * @retval         err、set、get、out、last_out
+  */
+void pid_clear(pid_t	*pid);
+		
+/**
+  * @brief          pid计算
+  * @param[in]      *pid ,get ,set
+  * @retval         none
+  */
+float pid_calc(pid_t* pid, float get, float set);
+		
+/**
+  * @brief          使用陀螺仪角速度的pid计算
+  * @param[in]      *pid ,get ,set
+  * @retval         none
+  */
+float pid_sp_calc(pid_t* pid, float get, float set, float gyro);
+		
+/**
+  * @brief          pid结构体初始化
+  * @param[in]      PID_struct_init(&pid_6020_moto1_velocity, DELTA_PID, 30000.0, 10000.0,
+									6.0f,	10.0f,	2.0f	); 
+										PID_struct_init(&pid_6020_moto1_position, POSITION_PID, 300.0, 100.0,
+									5.0f,	0.0f,	10.0f	); 
+  * @retval         none
+  */
 void PID_struct_init(
     pid_t* pid,
     uint32_t mode,
@@ -80,14 +122,6 @@ void PID_struct_init(
     float 	kp, 
     float 	ki, 
     float 	kd);
-    
-float pid_calc(pid_t* pid, float fdb, float ref);
-void pid_clear(pid_t* pid);    
-
-/*defined PID*/
-extern pid_t pid_6020_moto1_velocity;
-extern pid_t pid_6020_moto1_position;
-pid_t *get_moto1_position_pid_point(void);
-pid_t *get_moto1_velocity_pid_point(void);
+		
 #endif
 

@@ -30,17 +30,19 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
+//bsp
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 #include "bsp_led.h"
 #include "bsp_can.h"
-#include "remote_control.h"
+#include "bsp_rc.h"
 #include "tim_timer.h"
+#include "bsp_beagbone.h"
 
 //FreeRTOS
 #include "FreeRTOSConfig.h"
-
+#include "freertos_task.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 

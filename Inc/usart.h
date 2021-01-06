@@ -26,7 +26,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include "beagbone_task.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -41,13 +40,8 @@ extern UART_HandleTypeDef huart3;
 void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void RS232_UART1_Init(void);
 /* USER CODE END Prototypes */
-
-extern char tooler[100];
-
-//接收原始数据，为128个字节
-#define RS232_RX_BUF_NUM 128
 
 #ifdef __cplusplus
 }

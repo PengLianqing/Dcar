@@ -1,6 +1,6 @@
 /**
   ****************************(C) COPYRIGHT 2021 Peng****************************
-  * @file       control_isr.c/h
+  * @file       moto_control_task.c/h
   * @brief      FreeRTOSÈÎÎñ
   * @note       
   * @history
@@ -14,8 +14,10 @@
   @endverbatim
   ****************************(C) COPYRIGHT 2021 Peng****************************
 	*/
-#ifndef CONTROL_ISR_H_
-#define CONTROL_ISR_H_
+#ifndef MOTO_CONTROL_TASK_H_
+#define MOTO_CONTROL_TASK_H_
+//can
+#include "bsp_can.h"
 
 //pid
 #include "math.h"

@@ -1,6 +1,6 @@
 /**
   ****************************(C) COPYRIGHT 2021 Peng****************************
-  * @file       control_task.c/h
+  * @file       freertos_task.c/h
   * @brief      FreeRTOS任务
   * @note       
   * @history
@@ -18,7 +18,7 @@
 #ifndef FREERTOS_TASK_H
 #define FREERTOS_TASK_H
 
-//FreeRTOS头文件
+//FreeRTOS
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
@@ -26,12 +26,18 @@
 #include "bsp_led.h"
 
 /**
+  * @brief          freertos初始化
+  * @param[in]      null
+  * @retval         none
+  */
+void freertos_init(void);
+
+/**
   * @brief          init task
   * @param[in]      null
   * @retval         none
   */
 void init_task(void *pvParameters);
-TaskHandle_t xHandleInit = NULL;
 
 /**
   * @brief          test task
@@ -39,7 +45,6 @@ TaskHandle_t xHandleInit = NULL;
   * @retval         none
   */
 void test_task(void *pvParameters);
-TaskHandle_t xHandleTest = NULL;
 
 /**
   * @brief          USB task
@@ -47,20 +52,14 @@ TaskHandle_t xHandleTest = NULL;
   * @retval         none
   */
 void usb_task(void *pvParameters);
-TaskHandle_t xHandleUSB = NULL;
 
 /**
   * @brief          soft timer
   * @param[in]      null
   * @retval         none
   */
-TimerHandle_t SoftTimer500HzHandle;
 void SoftTimer500HzCallback(TimerHandle_t xTimer);
-
-TimerHandle_t SoftTimer200HzHandle;
 void SoftTimer200HzCallback(TimerHandle_t xTimer);
-
-TimerHandle_t SoftTimer50HzHandle;
 void SoftTimer50HzCallback(TimerHandle_t xTimer);
 
 #endif

@@ -2,6 +2,7 @@
 #include "main.h"
 
 
+
 void SystemClock_Config(void); // ±÷” ˜≈‰÷√
 
 
@@ -15,16 +16,23 @@ int main(void)
 	MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART3_UART_Init();
+	RS232_UART1_Init();
+	
+	//bsp Init
+	led_init();
+	beagbone_rs232_init();
   remote_control_init();
 	can_init();
+	
+	//Timer Init
 	//tim2_Init(84-1,1000-1);
-	gpio_test_init();
-	led_init();
-	control_init();
-	RS232_init();
+	
+	//Test Hardware Init
+	//gpio_test_init();
 	
 	//FreeRTOS
 	freertos_init();
+	
 	while(1)
 	{
 		

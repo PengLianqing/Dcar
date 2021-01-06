@@ -125,3 +125,4 @@ void BBB_data_receive(uint8_t *rx_buf, char* pData)
 		,&control_date.data1,&control_date.data2,&control_date.data3,&control_date.data4,&control_date.mode1,&control_date.mode2);
 	memset(pData ,0 ,strlen(pData));
 }
+

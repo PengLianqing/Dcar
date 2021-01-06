@@ -1,6 +1,6 @@
 /**
   ****************************(C) COPYRIGHT 2021 Peng****************************
-  * @file       control_task.c/h
+  * @file       freertos_task.c/h
   * @brief      FreeRTOS任务
   * @note       
   * @history
@@ -16,7 +16,45 @@
 	*/
 
 /* Includes ------------------------------------------------------------------*/
-#include "control_task.h"
+#include "freertos_task.h"
+#include "moto_control_task.h"
+/**
+  * @brief          init task
+  * @param[in]      null
+  * @retval         none
+  */
+void init_task(void *pvParameters);
+TaskHandle_t xHandleInit = NULL;
+
+/**
+  * @brief          test task
+  * @param[in]      null
+  * @retval         none
+  */
+void test_task(void *pvParameters);
+TaskHandle_t xHandleTest = NULL;
+
+/**
+  * @brief          USB task
+  * @param[in]      null
+  * @retval         none
+  */
+void usb_task(void *pvParameters);
+TaskHandle_t xHandleUSB = NULL;
+
+/**
+  * @brief          soft timer
+  * @param[in]      null
+  * @retval         none
+  */
+TimerHandle_t SoftTimer500HzHandle;
+void SoftTimer500HzCallback(TimerHandle_t xTimer);
+
+TimerHandle_t SoftTimer200HzHandle;
+void SoftTimer200HzCallback(TimerHandle_t xTimer);
+
+TimerHandle_t SoftTimer50HzHandle;
+void SoftTimer50HzCallback(TimerHandle_t xTimer);
 
 /**
   * @brief          freertos初始化
@@ -59,6 +97,8 @@ void init_task(void *pvParameters)
 							NULL, 										/* 任务参数 */
 							configMAX_PRIORITIES-1, 	/* 任务优先级，最高为configMAX_PRIORITIES-1，最低位0*/
 							&xHandleTest ); 		/* 任务句柄 */
+	
+	control_init(); //初始化闭环控制参数
 	
 	//创建soft timer任务500Hz
 	SoftTimer500HzHandle=xTimerCreate((const char*)"AutoReloadTimer", (TickType_t)2,

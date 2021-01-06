@@ -1,16 +1,28 @@
 /**
-  ******************************************************************************
-  * @file			pid.c
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+  * @file				pid.c/h
   * @version		V1.0.0
-  * @date			2016年11月11日17:21:36
   * @brief   		对于PID， 反馈/测量习惯性叫get/measure/real/fdb,
-						  期望输入一般叫set/target/ref
-  *******************************************************************************/
-  
+						  期望输入一般叫set/target/ref 
+  * @history
+  *  Version    Date            Author          Modification
+  *  V1.0.0     Jan-1-2021      Peng            1. 完成
+  *
+  @verbatim
+  ==============================================================================
+
+  ==============================================================================
+  @endverbatim
+  ****************************(C) COPYRIGHT 2021 Peng****************************
+	*/
+	
 /* Includes ------------------------------------------------------------------*/
 #include "pid.h"
 #include <math.h>
 
+/**
+  * @brief          求绝对值
+  */
 #define ABS(x)		((x>0)? (x): (-x)) 
 
 void abs_limit(float *a, float ABS_MAX){
@@ -19,7 +31,10 @@ void abs_limit(float *a, float ABS_MAX){
     if(*a < -ABS_MAX)
         *a = -ABS_MAX;
 }
-/*参数初始化--------------------------------------------------------------*/
+
+/**
+  * @brief          参数初始化
+  */
 static void pid_param_init(
     pid_t *pid, 
     uint32_t mode,
@@ -39,7 +54,12 @@ static void pid_param_init(
     pid->d = kd;
     
 }
-/*中途更改参数设定(调试)------------------------------------------------------------*/
+
+/**
+  * @brief          中途更改参数设定(调试)
+  * @param[in]      *pid ,kp ,ki ,kd
+  * @retval         none
+  */
 static void pid_reset(pid_t	*pid, float kp, float ki, float kd)
 {
     pid->p = kp;
@@ -47,6 +67,11 @@ static void pid_reset(pid_t	*pid, float kp, float ki, float kd)
     pid->d = kd;
 }
 
+/**
+  * @brief          清空pid计算数据
+  * @param[in]      *pid
+  * @retval         err、set、get、out、last_out
+  */
 void pid_clear(pid_t	*pid)
 {
 	pid->err[0]=0.0f;
@@ -69,10 +94,10 @@ void pid_clear(pid_t	*pid)
 }
 
 /**
-    *@bref. calculate delta PID and position PID
-    *@param[in] set： target
-    *@param[in] real	measure
-    */
+  * @brief          pid计算
+  * @param[in]      *pid ,get ,set
+  * @retval         none
+  */
 float pid_calc(pid_t* pid, float get, float set){
     pid->get[NOW] = get;
     pid->set[NOW] = set;
@@ -115,10 +140,10 @@ float pid_calc(pid_t* pid, float get, float set){
 }
 
 /**
-    *@bref. special calculate position PID @attention @use @gyro data!!
-    *@param[in] set： target
-    *@param[in] real	measure
-    */
+  * @brief          使用陀螺仪角速度的pid计算
+  * @param[in]      *pid ,get ,set
+  * @retval         none
+  */
 float pid_sp_calc(pid_t* pid, float get, float set, float gyro){
     pid->get[NOW] = get;
     pid->set[NOW] = set;
@@ -160,7 +185,14 @@ float pid_sp_calc(pid_t* pid, float get, float set, float gyro){
     return pid->pid_mode==POSITION_PID ? pid->pos_out : pid->delta_out;
 }
 
-/*pid总体初始化-----------------------------------------------------------------*/
+/**
+  * @brief          pid结构体初始化
+  * @param[in]      PID_struct_init(&pid_6020_moto1_velocity, DELTA_PID, 30000.0, 10000.0,
+									6.0f,	10.0f,	2.0f	); 
+										PID_struct_init(&pid_6020_moto1_position, POSITION_PID, 300.0, 100.0,
+									5.0f,	0.0f,	10.0f	); 
+  * @retval         none
+  */
 void PID_struct_init(
     pid_t* pid,
     uint32_t mode,
@@ -180,10 +212,4 @@ void PID_struct_init(
     /*init pid param */
     pid->f_param_init(pid, mode, maxout, intergral_limit, kp, ki, kd);
 }
-
-void pid_test_init(){
-	
-	//为了解决上位机调参的时候第一次赋值的时候清零其他参数， 应该提前把参数表填充一下！
-}
-
 
