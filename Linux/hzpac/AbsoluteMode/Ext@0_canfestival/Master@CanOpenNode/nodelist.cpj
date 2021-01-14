@@ -1,0 +1,7 @@
+[TOPOLOGY]
+NetName=None
+Nodes=0x01
+Node3Present=0x01
+Node3Name=The 1st Slave is NMT
+Node3DCFName=ZC.eds
+EDSBaseName=eds

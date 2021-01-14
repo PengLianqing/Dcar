@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "add usb-uart support in kernel"
+umount /mnt/user
+mount /dev/mmcblk0p1 /mnt/user
+cp /home/vmlinuz-3.10.32-ipipe /mnt/user/boot

@@ -1,0 +1,42 @@
+#!/bin/sh
+
+echo "add your startup code here!"
+
+ifconfig eth1 192.168.2.23
+
+cp /home/share/cf_lib/lib/libmbtcp.so /home/share/cf_lib/lib/libshm.so /usr/lib
+
+#start ethercat
+./start_ethercat
+
+#start samba
+./start_samba
+#sleep 3
+
+#start ethercat slave
+if [ -e /home/start_ecat_slave ]; then
+	./start_ecat_slave &
+fi
+
+#start qtouch, must sleep some time
+sleep 5
+if [ -e /home/startqtouch ]; then
+	./startqtouch&
+fi
+
+#start plc
+if [ -e /home/start_plc ]; then
+	./start_plc &
+fi
+
+#call penglianqing 15641153169
+
+insmod /home/ch34x.ko
+sleep 3
+
+cd /home/share/workpth
+python main.py &
+
+
+
+

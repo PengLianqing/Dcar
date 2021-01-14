@@ -1,0 +1,4 @@
+将加压后的文件拷到IPC的/home目录下，运行add_usb_wart,再重启即可
+
+insmode ch34x.ko
+每次开机都需要添加一次驱动。

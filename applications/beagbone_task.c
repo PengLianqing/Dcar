@@ -51,8 +51,15 @@ struct control_date_t control_date;
   * @param[in]      none
   * @retval         
   */
+const RC_ctrl_t *RC_beaglebone; 
 void SoftTimer50HzCallback(TimerHandle_t xTimer)
 {
+	static int InitTimes = 0;
+	if(InitTimes==0)
+	{
+		RC_beaglebone = get_remote_control_point();
+		InitTimes++;
+	}
 	/*
 	要发送的数据：
 	程序运行数据.xTimeNow ,imu_angel[0] ,imu_angel[1] ,imu_angel[2]
@@ -63,18 +70,23 @@ void SoftTimer50HzCallback(TimerHandle_t xTimer)
 	xTimeNow = xTaskGetTickCount();
 	#if USE_PRINTF_TRANSLATE
 	//使用printf字符串方式发送数据
-		sprintf(rs232_tx_buf ,"D:%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d\n",
+//		sprintf(rs232_tx_buf ,"D:%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d\n",
+//			(float)(rand()%1024*0.1f),
+//			(float)(rand()%1024*0.1f),
+//			(float)(rand()%1024*0.1f),
+//			(float)(rand()%1024*0.1f),
+//			(float)(rand()%1024*0.1f),
+//			(float)(rand()%1024*0.1f),
+//			rand()%1024,
+//			rand()%1024,
+//			rand()%1024,
+//			RC_beaglebone->rc.s[1],
+//			rand()%1024,
+//			rand()%1024);
+		sprintf(rs232_tx_buf ,"D:%.2f,%.2f,%d,%d\n",
 			(float)(rand()%1024*0.1f),
 			(float)(rand()%1024*0.1f),
-			(float)(rand()%1024*0.1f),
-			(float)(rand()%1024*0.1f),
-			(float)(rand()%1024*0.1f),
-			(float)(rand()%1024*0.1f),
-			rand()%1024,
-			rand()%1024,
-			rand()%1024,
-			rand()%1024,
-			rand()%1024,
+			RC_beaglebone->rc.s[1],
 			rand()%1024);		
 		/*
 		用于测试beagbone发回来的数据，beagbone的串口..我真是无语了......
